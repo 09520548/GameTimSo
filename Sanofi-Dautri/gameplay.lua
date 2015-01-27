@@ -26,54 +26,86 @@ function selectImage( event )
 	if	(event.phase == "ended") then
 		local positionRow = tonumber(string.sub(target.name,1,1))
 		local positionCol = tonumber(string.sub(target.name,3))
-		if (lastSelect ~= target.name) then
-			if (selectFirst == 0 and selectSecond == 0)  then
-				selectFirst = arrGameBoard[positionRow][positionCol]
-				arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
-				-- luu 1 la hang, 2 la cot cua lan chon 1, 3 la hang, 4 la cot cua lan chon 2
-				tmpStoreSelect[1] = positionRow
-				tmpStoreSelect[2] = positionCol
-				drawImage()
-			elseif (selectFirst ~= 0 and selectSecond == 0) then
-				selectSecond = arrGameBoard[positionRow][positionCol]
-				arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
-				tmpStoreSelect[3] = positionRow
-				tmpStoreSelect[4] = positionCol
-				drawImage()
 
-				timer.performWithDelay( 500, function()
-					if (checkMatch() == false) then
-						for i=1,4 do
-							for j=1,5 do
-								if (arrData[i][j] ~= 100) then
-									arrData[i][j] = -1
+		transition.scaleTo( target, {time=300, xScale=0, onComplete=function()
+			if (lastSelect ~= target.name) then
+				if (selectFirst == 0 and selectSecond == 0)  then
+					selectFirst = arrGameBoard[positionRow][positionCol]
+					arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+					-- luu 1 la hang, 2 la cot cua lan chon 1, 3 la hang, 4 la cot cua lan chon 2
+					tmpStoreSelect[1] = positionRow
+					tmpStoreSelect[2] = positionCol
+					drawImage()
+				elseif (selectFirst ~= 0 and selectSecond == 0) then
+					selectSecond = arrGameBoard[positionRow][positionCol]
+					arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+					tmpStoreSelect[3] = positionRow
+					tmpStoreSelect[4] = positionCol
+					drawImage()
+
+					timer.performWithDelay( 100, function()
+						if (checkMatch() == false) then
+							if(cardGroup.numChildren > 0) then
+								for i=1,cardGroup.numChildren do
+									if (cardGroup[i]~=nil) then
+										local row = tonumber(string.sub(cardGroup[i].name,1,1))
+										local col = tonumber(string.sub(cardGroup[i].name,3))
+										if (arrData[row][col] ~= 100 and arrData[row][col] ~= -1) then
+											transition.scaleTo( cardGroup[i], {time=300, xScale=0, onComplete=function()
+												selectFirst = 0
+												selectSecond = 0
+												lastSelect = "0/0"
+												drawImage()
+											end})
+										end
+									end
 								end
 							end
+							for i=1,4 do
+								for j=1,5 do
+									if (arrData[i][j] ~= 100) then
+										arrData[i][j] = -1
+									end
+								end
+							end
+
+						else 
+							arrData[tmpStoreSelect[1]][tmpStoreSelect[2]] = 100
+							arrData[tmpStoreSelect[3]][tmpStoreSelect[4]] = 100
+							selectFirst = 0
+							selectSecond = 0
+							lastSelect = "0/0"
+							drawImage()
 						end
-					else 
-						arrData[tmpStoreSelect[1]][tmpStoreSelect[2]] = 100
-						arrData[tmpStoreSelect[3]][tmpStoreSelect[4]] = 100
-					end
-					selectFirst = 0
-					selectSecond = 0
-					lastSelect = "0/0"
-					drawImage()
-		      	end, 1 )
+						
+			      	end, 1 )
+				end
+				lastSelect = target.name
 			end
-			lastSelect = target.name
-		end
+		end} )
+
+		
 		
 	end
 end
 
 function drawImage()
-	if(#cardGroup > 0) then
-		for i=1,#cardGroup do
-			cardGroup[i]:removeEventListener("touch", selectImage)
-			cardGroup[i]:removeSefl()
-			cardGroup[i] = nil;
+	if(cardGroup.numChildren > 0) then
+		for i=1,cardGroup.numChildren do
+			if (cardGroup[i]~=nil) then
+				local row = tonumber(string.sub(cardGroup[i].name,1,1))
+				local col = tonumber(string.sub(cardGroup[i].name,3))
+				cardGroup[i]:removeEventListener("touch", selectImage)
+				if (arrData[row][col] == -1) then
+					cardGroup[i]:removeSelf()
+					cardGroup[i] = nil;
+				end
+				
+			end
+			
 		end
 	end
+
 
 	local currX = 200
 	local currY = 90
@@ -86,6 +118,7 @@ function drawImage()
 				card.x = currX
 				card.y = currY
 				card.name = i.."/"..j
+				card.tag = arrData[i][j]
 				card:addEventListener("touch", selectImage)
 				cardGroup:insert(card)
 			elseif (arrData[i][j] ~= 100) then
@@ -94,6 +127,8 @@ function drawImage()
 				card.anchorY = 0
 				card.x = currX
 				card.y = currY
+				card.tag = arrData[i][j]
+				card.name = i.."/"..j
 				cardGroup:insert(card)
 			end
 			currX = currX + 150
