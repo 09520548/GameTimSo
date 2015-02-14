@@ -10,7 +10,6 @@ local arrData = {1,2,3,4}
 local arrGameBoard = {1,2,3,4}
 local buttonImages = {1,1, 2,2, 3,3, 4,4, 5,5, 6,6, 7,7, 8,8, 9,9, 10,10}
 local cardGroup = display.newGroup()
-local coverGroup = display.newGroup()
 local selectFirst = 0
 local selectSecond = 0
 local lastSelect = "0/0"
@@ -21,7 +20,6 @@ local numCoupleCardFound = 0
 local isConselect = true
 local isBeginCheck = false
 local isAllowSelect = false
-local mainGroup = display.newGroup()
 
 print = function() end
 
@@ -48,11 +46,11 @@ end
 function checkTimeout(event)
 	local numCardFound = 0
 	if (timeCountDown>0) then
-
-		for i=1,cardGroup.numChildren do
-			card = cardGroup[i]
-			if (card.tag == 100) then
-				numCardFound = numCardFound + 1
+		for i=1,4 do
+			for j=1,5 do
+				if (arrData[i][j] == 100) then
+					numCardFound = numCardFound + 1
+				end
 			end
 		end
 		numCoupleCardFound = numCardFound/2
@@ -76,71 +74,155 @@ end
 function selectImage( event )
 	local target = event.target
 	if	(event.phase == "ended") then
-		local positionRow = tonumber(string.sub(event.target.name,1,1))
-		local positionCol = tonumber(string.sub(event.target.name,3))
 		if (isConselect) then
 			isConselect = false
-			transition.scaleTo(target, {time=300, xScale=0, onComplete=function()
-				for i=1,cardGroup.numChildren do
-					card = cardGroup[i]
-					if (card.name== target.name) then
-						transition.scaleTo(card, {time=300, xScale=1, onComplete=function()
-							if (selectFirst == 0 and selectSecond == 0) then
-								selectFirst = target.tag
-								isConselect = true
-							elseif (selectFirst ~= 0 and selectSecond == 0) then
-								selectSecond = target.tag
-								isBeginCheck = true
-							end
-						end})
+			isAllowSelect = false
+			local positionRow = tonumber(string.sub(event.target.name,1,1))
+			local positionCol = tonumber(string.sub(event.target.name,3))
+			if (arrData[positionRow][positionCol] == -1) then
+				transition.scaleTo(event.target, {time=300, xScale=0, onComplete=function()
+					if (lastSelect ~= event.target.name) then
+						lastSelect = event.target.name
+						if (selectFirst == 0 and selectSecond == 0)  then
+							selectFirst = arrGameBoard[positionRow][positionCol]
+							arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+							-- luu 1 la hang, 2 la cot cua lan chon 1, 3 la hang, 4 la cot cua lan chon 2
+							tmpStoreSelect[1] = positionRow
+							tmpStoreSelect[2] = positionCol
+							drawImage()
+							isConselect = true
+						elseif (selectFirst ~= 0 and selectSecond == 0) then
+							selectSecond = arrGameBoard[positionRow][positionCol]
+							arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+							tmpStoreSelect[3] = positionRow
+							tmpStoreSelect[4] = positionCol
+							drawImage()
+							-- txtDialog3.text = "2"
+							isBeginCheck = true
+						end
 					end
-				end
-			end})
+					-- drawImage()
+				end})
+			end
 		end
+		
 
+		-- transition.scaleTo( target, {time=300, xScale=0, onComplete=function()
+			-- if (lastSelect ~= target.name) then
+			-- 	if (selectFirst == 0 and selectSecond == 0)  then
+			-- 		selectFirst = arrGameBoard[positionRow][positionCol]
+			-- 		arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+			-- 		-- luu 1 la hang, 2 la cot cua lan chon 1, 3 la hang, 4 la cot cua lan chon 2
+			-- 		tmpStoreSelect[1] = positionRow
+			-- 		tmpStoreSelect[2] = positionCol
+			-- 		drawImage()
+			-- 	elseif (selectFirst ~= 0 and selectSecond == 0) then
+			-- 		selectSecond = arrGameBoard[positionRow][positionCol]
+			-- 		arrData[positionRow][positionCol] = arrGameBoard[positionRow][positionCol]
+			-- 		tmpStoreSelect[3] = positionRow
+			-- 		tmpStoreSelect[4] = positionCol
+			-- 		drawImage()
+
+			-- 		timer.performWithDelay( 100, function()
+			-- 			if (checkMatch() == false) then
+			-- 				if(cardGroup.numChildren > 0) then
+			-- 					for i=1,cardGroup.numChildren do
+			-- 						if (cardGroup[i]~=nil) then
+			-- 							local row = tonumber(string.sub(cardGroup[i].name,1,1))
+			-- 							local col = tonumber(string.sub(cardGroup[i].name,3))
+			-- 							if (arrData[row][col] ~= 100 and arrData[row][col] ~= -1) then
+			-- 								transition.scaleTo( cardGroup[i], {time=300, xScale=0, onComplete=function()
+			-- 									selectFirst = 0
+			-- 									selectSecond = 0
+			-- 									lastSelect = "0/0"
+			-- 									drawImage()
+			-- 								end})
+			-- 							end
+			-- 						end
+			-- 					end
+			-- 				end
+			-- 				for i=1,4 do
+			-- 					for j=1,5 do
+			-- 						if (arrData[i][j] ~= 100) then
+			-- 							arrData[i][j] = -1
+			-- 						end
+			-- 					end
+			-- 				end
+
+			-- 			else 
+			-- 				arrData[tmpStoreSelect[1]][tmpStoreSelect[2]] = 100
+			-- 				arrData[tmpStoreSelect[3]][tmpStoreSelect[4]] = 100
+			-- 				selectFirst = 0
+			-- 				selectSecond = 0
+			-- 				lastSelect = "0/0"
+			-- 				drawImage()
+			-- 			end
+						
+			--       	end, 1 )
+			-- 	end
+			-- 	lastSelect = target.name
+			-- end
+		-- end} )
+
+		
+		
 	end
 
 	return true
 end
 
 function drawImage()
-
-	cardGroup:removeSelf()
-	cardGroup = nil
-	cardGroup = display.newGroup()
-	mainGroup:insert(cardGroup)
-	coverGroup:removeSelf()
-	coverGroup = nil
-	coverGroup = display.newGroup()
-	mainGroup:insert(coverGroup)
-
-	local currX = 200
-	local currY = 90
-	for i=1,4 do
-		for j=1,5 do
-			local card = display.newImageRect( "images/img_"..arrGameBoard[i][j]..".png", 62, 159 )
-			card.anchorX = 0.5
-			card.anchorY = 0
-			card.x = currX
-			card.y = currY
-			card.tag = arrGameBoard[i][j]
-			card.name = i.."/"..j
-			card:scale(0, 1)
-			cardGroup:insert(card)
-
-			local cardCover = display.newImageRect( "images/img_cover.png", 62, 159 )
-			cardCover.anchorX = 0.5
-			cardCover.anchorY = 0
-			cardCover.x = currX
-			cardCover.y = currY
-			cardCover.name = i.."/"..j
-			cardCover.tag = arrGameBoard[i][j]
-			cardCover:addEventListener("touch", selectImage)
-			coverGroup:insert(cardCover)
-			currX = currX + 150
+	if (checkWin()) then
+		txtDialog2.alpha = 0
+		txtDialog.alpha = 1
+		groupPopup:toFront()
+	else
+		if(cardGroup.numChildren > 0) then
+			for i=1,cardGroup.numChildren do
+				if (cardGroup[i]~=nil) then
+					local row = tonumber(string.sub(cardGroup[i].name,1,1))
+					local col = tonumber(string.sub(cardGroup[i].name,3))
+					cardGroup[i]:removeEventListener("touch", selectImage)
+					if (arrData[row][col] ~= 100) then
+						cardGroup[i]:removeSelf()
+						cardGroup[i] = nil;
+					end
+					
+				end
+				
+			end
 		end
-		currX = 200
-		currY = currY + 165
+
+
+		local currX = 200
+		local currY = 90
+		for i=1,4 do
+			for j=1,5 do
+				if (arrData[i][j] == -1) then
+					local card = display.newImageRect( "images/img_cover.png", 62, 159 )
+					card.anchorX = 0.5
+					card.anchorY = 0
+					card.x = currX
+					card.y = currY
+					card.name = i.."/"..j
+					card.tag = arrData[i][j]
+					card:addEventListener("touch", selectImage)
+					cardGroup:insert(card)
+				elseif (arrData[i][j] ~= 100) then
+					local card = display.newImageRect( "images/img_"..arrData[i][j]..".png", 62, 159 )
+					card.anchorX = 0.5
+					card.anchorY = 0
+					card.x = currX
+					card.y = currY
+					card.tag = arrData[i][j]
+					card.name = i.."/"..j
+					cardGroup:insert(card)
+				end
+				currX = currX + 150
+			end
+			currX = 200
+			currY = currY + 165
+		end
 	end
 end
 
@@ -251,54 +333,67 @@ function createPopup( parentGroup )
 	parentGroup:insert(groupPopup)
 	groupPopup:toBack()
 
-	-- optDialog3 = 
-	-- {
- --    	text = "a",
- --    	x = display.contentWidth/2,
- --    	align = "center",
- --    	y = 100,
- --    	height = 150,
- --    	width = 500,     --required for multi-line and alignment
- --    	-- font = "UTM Cookies",
- --    	fontSize = 40
-	-- }
-	-- txtDialog3 = display.newText( optDialog3 )
-	-- txtDialog3:setFillColor( 0, 0, 0 )
+	optDialog3 = 
+	{
+    	text = "a",
+    	x = display.contentWidth/2,
+    	align = "center",
+    	y = 100,
+    	height = 150,
+    	width = 500,     --required for multi-line and alignment
+    	-- font = "UTM Cookies",
+    	fontSize = 40
+	}
+	txtDialog3 = display.newText( optDialog3 )
+	txtDialog3:setFillColor( 0, 0, 0 )
 end
 
 function reflipCard()
 	if (isBeginCheck) then
 		isBeginCheck = false
-		if (checkMatch() == false) then
-			for i=1,cardGroup.numChildren do
-				card = cardGroup[i]
-				if (card.xScale == 1 and card.tag ~= 100) then
-					transition.scaleTo( card, {time=300, xScale=0, onComplete=function()
-						transition.scaleTo( coverGroup[i], {time=300, xScale=1, onComplete=function()
-							selectFirst = 0
-							selectSecond = 0
-							isConselect = true
-						end})
-					end})
+		timer.performWithDelay(300, function()
+			if (checkMatch() == false) then
+				if(cardGroup.numChildren > 0) then
+					for i=1,cardGroup.numChildren do
+						if (cardGroup[i]~=nil) then
+							local row = tonumber(string.sub(cardGroup[i].name,1,1))
+							local col = tonumber(string.sub(cardGroup[i].name,3))
+							if (arrData[row][col] ~= 100 and arrData[row][col] ~= -1) then
+								transition.scaleTo( cardGroup[i], {time=300, xScale=0, onComplete=function()
+									selectFirst = 0
+									selectSecond = 0
+									lastSelect = "0/0"
+									drawImage()
+									isConselect = true
+								end})
+							end
+						end
+					end
 				end
-			end
-		else
-			for i=1,cardGroup.numChildren do
-				card = cardGroup[i]
-				if (card.tag == selectFirst) then
-					card.tag = 100
+				for i=1,4 do
+					for j=1,5 do
+						if (arrData[i][j] ~= 100) then
+							arrData[i][j] = -1
+						end
+					end
 				end
+
+			else 
+				arrData[tmpStoreSelect[1]][tmpStoreSelect[2]] = 100
+				arrData[tmpStoreSelect[3]][tmpStoreSelect[4]] = 100
+				selectFirst = 0
+				selectSecond = 0
+				lastSelect = "0/0"
+				drawImage()
+				isConselect = true
 			end
-			selectFirst = 0
-			selectSecond = 0
-			isConselect = true
-		end
+		end, 1)
+		
 	end
 end
 
 function scene:create( event )
 	local sceneGroup = self.view
-	mainGroup = sceneGroup
 
 	-- initialize the scene
 	background = display.newImageRect( "images/bg.png", _W, _H )
@@ -323,7 +418,6 @@ function scene:create( event )
 	sceneGroup:insert( logo )
 	sceneGroup:insert( gameboard )
 	sceneGroup:insert( cardGroup)
-	sceneGroup:insert( coverGroup)
 
 	options2 = 
 	{
