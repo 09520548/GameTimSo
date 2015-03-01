@@ -22,6 +22,7 @@ local isConselect = true
 local isBeginCheck = false
 local isAllowSelect = false
 local mainGroup = display.newGroup()
+local arrCircleCountDown = display.newGroup()
 
 print = function() end
 
@@ -59,6 +60,7 @@ function checkTimeout(event)
 	else
 		if(timerCountDown ~= nil) then
 			timer.cancel(timerCountDown)
+			cicleCountDown:pause()
 		end
 		if (checkWin()) then
 			txtDialog2.alpha = 0
@@ -175,26 +177,29 @@ function replay(event)
 			end
 		end,0 )
 		groupPopup:toBack()
-		
-		ringObject:removeSelf()
-		ringObject = nil;
 
-		ringObject = progressRing.new({
-	     radius = 50,
-	     -- bgColor = {1, 0, 0, 1},
-	     -- ringColor = {0, 1, 0, 1},
-	     ringColor = {74/255, 99/255, 172, 1},
-	     bgColor = {1, 1, 1, 1},
-	     ringDepth = .22,
-	     time = 60000,
-	     position = 0
-		})
-		ringObject.anchorX = 0
-		ringObject.anchorY = 0
-		ringObject.x =  _W-60
-		ringObject.y = 70
-		ringObject:goTo(1);
-		ringObject:resume()
+		cicleCountDown:play()
+
+		
+		-- ringObject:removeSelf()
+		-- ringObject = nil;
+
+		-- ringObject = progressRing.new({
+	 --     radius = 50,
+	 --     -- bgColor = {1, 0, 0, 1},
+	 --     -- ringColor = {0, 1, 0, 1},
+	 --     ringColor = {74/255, 99/255, 172, 1},
+	 --     bgColor = {1, 1, 1, 1},
+	 --     ringDepth = .22,
+	 --     time = 60000,
+	 --     position = 0
+		-- })
+		-- ringObject.anchorX = 0
+		-- ringObject.anchorY = 0
+		-- ringObject.x =  _W-60
+		-- ringObject.y = 70
+		-- ringObject:goTo(1);
+		-- ringObject:resume()
 	end
 	return true
 end
@@ -296,6 +301,13 @@ function reflipCard()
 	end
 end
 
+function back( event )
+	if (event.phase == "ended") then
+		composer.gotoScene( "intro" )
+	end
+	return true
+end
+
 function scene:create( event )
 	local sceneGroup = self.view
 	mainGroup = sceneGroup
@@ -328,9 +340,9 @@ function scene:create( event )
 	options2 = 
 	{
     	text = "00:60",
-    	x = _W-60,
+    	x = _W-65,
     	align = "center",
-    	y = 70,
+    	y = 65,
     	fontSize = 25
 	}
 
@@ -338,6 +350,42 @@ function scene:create( event )
 	txtTime:setFillColor( 0, 0, 0 )
 	sceneGroup:insert(txtTime)
 	txtTime.name = "txtTime"
+	sceneGroup:insert(txtTime)
+
+	-- for i=0,timeCountDown-1 do
+	-- 	local countDownCircle = display.newImageRect( "images/countdown_"..i..".png", 100, 100 )
+	-- 	countDownCircle.anchorX = 0
+	-- 	countDownCircle.anchorY = 0
+		-- countDownCircle.x = _W - 110
+		-- countDownCircle.y = 20
+	-- 	-- countDownCircle.isVisible = false
+	-- 	arrCircleCountDown:insert(countDownCircle)
+	-- end
+
+	local seqCircle = { 
+	  { name="normal", start=1, count=60, time=60000, loopCount = 1}
+	}
+	local optionsCircle =
+	{
+    	--required parameters
+    	width = 184,
+    	height = 184,
+    	numFrames = 60,
+
+   		--optional parameters; used for dynamic resolution support
+    	sheetContentWidth = 1840,  -- width of original 1x size of entire sheet
+    	sheetContentHeight = 1104  -- height of original 1x size of entire sheet
+	}
+	circleSprite = graphics.newImageSheet( "images/sprite_circle.png", optionsCircle)
+	cicleCountDown = display.newSprite( circleSprite, seqCircle )
+	cicleCountDown:scale(0.5, 0.5)
+	cicleCountDown.anchorX = 0
+	cicleCountDown.anchorY = 0
+	cicleCountDown.x = _W - 110
+	cicleCountDown.y = 20
+	cicleCountDown:play()
+	sceneGroup:insert(cicleCountDown)
+	
 
 	timerCountDown = timer.performWithDelay( 1000, function()
 		timeCountDown=timeCountDown-1;
@@ -348,23 +396,31 @@ function scene:create( event )
 		end
 	end,0 )
 
-	ringObject = progressRing.new({
-     radius = 50,
-     -- bgColor = {1, 0, 0, 1},
-     -- ringColor = {0, 1, 0, 1},
-     ringColor = {74/255, 99/255, 172, 1},
-     bgColor = {1, 1, 1, 1},
-     ringDepth = .22,
-     time = 60000,
-     position = 0
-	})
-	ringObject.anchorX = 0
-	ringObject.anchorY = 0
-	ringObject.x =  _W-60
-	ringObject.y = 70
-	ringObject:goTo(1);
-	ringObject:resume()
-	sceneGroup:insert(ringObject)
+	btnBack = display.newImageRect("images/btn_back.png", 92, 62)
+	btnBack.anchorX = 1
+	btnBack.anchorY = 1
+	btnBack.x = _W-10
+	btnBack.y = _H - 10
+	sceneGroup:insert(btnBack)
+	btnBack:addEventListener("touch", back)
+
+	-- ringObject = progressRing.new({
+ --     radius = 50,
+ --     -- bgColor = {1, 0, 0, 1},
+ --     -- ringColor = {0, 1, 0, 1},
+ --     ringColor = {74/255, 99/255, 172, 1},
+ --     bgColor = {1, 1, 1, 1},
+ --     ringDepth = .22,
+ --     time = 60000,
+ --     position = 0
+	-- })
+	-- ringObject.anchorX = 0
+	-- ringObject.anchorY = 0
+	-- ringObject.x =  _W-60
+	-- ringObject.y = 70
+	-- ringObject:goTo(1);
+	-- ringObject:resume()
+	-- sceneGroup:insert(ringObject)
 
 	createPopup(sceneGroup)
 
@@ -395,6 +451,7 @@ function scene:hide( event )
       	-- Example: stop timers, stop animation, stop audio, etc.
       elseif (phase == "did") then
       	-- Called immediately after scene goes off screen.
+      	Runtime:removeEventListener("enterFrame", checkTimeout)
 
 	end
 end
