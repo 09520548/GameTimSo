@@ -28,6 +28,7 @@ print = function() end
 
 function checkMatch()
 	if (selectFirst == selectSecond) then
+		audio.play( matchSoundFile )
 		return true
 	else
 		return false
@@ -60,7 +61,7 @@ function checkTimeout(event)
 	else
 		if(timerCountDown ~= nil) then
 			timer.cancel(timerCountDown)
-			cicleCountDown:pause()
+			-- cicleCountDown:pause()
 		end
 		if (checkWin()) then
 			txtDialog2.alpha = 0
@@ -81,6 +82,7 @@ function selectImage( event )
 		local positionRow = tonumber(string.sub(event.target.name,1,1))
 		local positionCol = tonumber(string.sub(event.target.name,3))
 		if (isConselect) then
+			audio.play( clickSoundFile )
 			isConselect = false
 			transition.scaleTo(target, {time=300, xScale=0, onComplete=function()
 				for i=1,cardGroup.numChildren do
@@ -219,7 +221,7 @@ function createPopup( parentGroup )
 	btnReplay.x = _W/2
 	btnReplay.y = _H/2+50
 	groupPopup:insert(btnReplay)
-	btnReplay:addEventListener("touch", replay)
+	btnReplay:addEventListener("touch", back)
 
 	optDialog = 
 	{
@@ -303,6 +305,7 @@ end
 
 function back( event )
 	if (event.phase == "ended") then
+		Runtime:removeEventListener( "enterFrame", checkTimeout )
 		composer.gotoScene( "intro" )
 	end
 	return true
@@ -438,6 +441,12 @@ function scene:show( event )
 	elseif (phase == "did") then
 		initData()
 		Runtime:addEventListener("enterFrame", checkTimeout)
+
+		bgSoundFile = audio.loadSound("bg.mp3" )
+		bgsound = audio.play( bgSoundFile, { channel=1, loops=-1} )
+
+		clickSoundFile = audio.loadSound("click.mp3" )
+		matchSoundFile = audio.loadSound("get.mp3")
 	end
 end
 
@@ -449,9 +458,11 @@ function scene:hide( event )
 		-- Called when the scene is on screen (but is about to go off screen).
       	-- Insert code here to "pause" the scene.
       	-- Example: stop timers, stop animation, stop audio, etc.
+      	timer.cancel(timerCountDown)
+      	audio.stop(bgsound)
       elseif (phase == "did") then
       	-- Called immediately after scene goes off screen.
-      	Runtime:removeEventListener("enterFrame", checkTimeout)
+      	
 
 	end
 end
