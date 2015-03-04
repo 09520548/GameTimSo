@@ -66,11 +66,13 @@ function checkTimeout(event)
 		if (checkWin()) then
 			txtDialog2.alpha = 0
 			txtDialog.alpha = 1
+			txtDialog3.text = "Số điểm của bạn là 1500 điểm"
 			groupPopup:toFront()
 		else
 			txtDialog2.alpha = 1
 			txtDialog2.text = "CHÚC MỪNG BẠN ĐÃ TÌM RA "..numCoupleCardFound.."/10 HÌNH"
 			txtDialog.alpha = 0
+			txtDialog3.text = "Số điểm của bạn là "..(numCoupleCardFound*50).." điểm"
 			groupPopup:toFront()
 		end
 	end
@@ -85,6 +87,7 @@ function selectImage( event )
 			audio.play( clickSoundFile )
 			isConselect = false
 			transition.scaleTo(target, {time=300, xScale=0, onComplete=function()
+				target.alpha = 0
 				for i=1,cardGroup.numChildren do
 					card = cardGroup[i]
 					if (card.name== target.name) then
@@ -228,7 +231,7 @@ function createPopup( parentGroup )
     	text = "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH NHIỆM VỤ",
     	x = display.contentWidth/2,
     	align = "center",
-    	y = 350,
+    	y = 300,
     	height = 150,
     	width = 500,     --required for multi-line and alignment
     	-- font = "UTM Cookies",
@@ -244,7 +247,7 @@ function createPopup( parentGroup )
     	text = "CHÚC MỪNG BẠN ĐÃ TÌM RA 4/10 HÌNH",
     	x = display.contentWidth/2,
     	align = "center",
-    	y = 350,
+    	y = 300,
     	height = 150,
     	width = 500,     --required for multi-line and alignment
     	-- font = "UTM Cookies",
@@ -254,6 +257,22 @@ function createPopup( parentGroup )
 	txtDialog2:setFillColor( 74/255, 99/255, 172/255  )
 	groupPopup:insert(txtDialog2)
 	txtDialog2.name = "txtDialog2"
+
+	optDialog3 = 
+	{
+    	text = "Số điểm của bạn là 1000 điểm",
+    	x = display.contentWidth/2,
+    	align = "center",
+    	y = 410,
+    	height = 150,
+    	width = 500,     --required for multi-line and alignment
+    	-- font = "UTM Cookies",
+    	fontSize = 35
+	}
+	txtDialog3 = display.newText( optDialog3 )
+	txtDialog3:setFillColor( 74/255, 99/255, 172/255  )
+	groupPopup:insert(txtDialog3)
+	txtDialog3.name = "txtDialog3"
 
 	parentGroup:insert(groupPopup)
 	groupPopup:toBack()
@@ -281,6 +300,7 @@ function reflipCard()
 				card = cardGroup[i]
 				if (card.xScale == 1 and card.tag ~= 100) then
 					transition.scaleTo( card, {time=300, xScale=0, onComplete=function()
+						coverGroup[i].alpha = 1
 						transition.scaleTo( coverGroup[i], {time=300, xScale=1, onComplete=function()
 							selectFirst = 0
 							selectSecond = 0
