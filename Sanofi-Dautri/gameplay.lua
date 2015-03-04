@@ -58,6 +58,7 @@ function checkTimeout(event)
 			end
 		end
 		numCoupleCardFound = numCardFound/2
+		txtDiem.text = "ĐIỂM "..(numCoupleCardFound*50)
 	else
 		if(timerCountDown ~= nil) then
 			timer.cancel(timerCountDown)
@@ -373,7 +374,20 @@ function scene:create( event )
 	txtTime:setFillColor( 0, 0, 0 )
 	sceneGroup:insert(txtTime)
 	txtTime.name = "txtTime"
-	sceneGroup:insert(txtTime)
+
+	options3 = 
+	{
+    	text = "DIEM 0",
+    	x = _W-250,
+    	align = "left",
+    	y = 40,
+    	fontSize = 40
+	}
+
+	txtDiem = display.newText( options3 )
+	txtDiem:setFillColor( 74/255, 99/255, 172/255  )
+	sceneGroup:insert(txtDiem)
+	txtDiem.name = "txtTime"
 
 	-- for i=0,timeCountDown-1 do
 	-- 	local countDownCircle = display.newImageRect( "images/countdown_"..i..".png", 100, 100 )
